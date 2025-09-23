@@ -4,8 +4,9 @@
   "description": "an express server",
   "main": "app.js",
   "scripts": {
-    "lint": "npx eslint .",
-    "dev": "nodemon app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "lint": "npx eslint ."
   },
   "repository": {
     "type": "git",
