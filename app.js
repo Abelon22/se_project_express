@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const routes = require("./routes");
-const { MONGO_URI, PORT } = require("./utils/config");
-
+const errorHandler = require("./middlewares/errorHandler");
 const { createUser, login } = require("./controllers/users");
+
+const { MONGO_URI, PORT } = require("./utils/config");
 
 async function connectToMongoose() {
   await mongoose.connect(MONGO_URI);
@@ -29,6 +30,8 @@ app.post("/signin", login);
 app.post("signup", createUser);
 
 app.use(routes);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

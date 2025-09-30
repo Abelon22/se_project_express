@@ -1,25 +1,16 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-} = require("../utils/errors");
+const { createError, mapMongooseError } = require("../utils/errors");
 
-async function getItems(req, res) {
+async function getItems(_req, res, next) {
   try {
     const items = await ClothingItem.find({});
     return res.send(items);
   } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`
-    );
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
+    return next(err);
   }
 }
 
-async function createItem(req, res) {
+async function createItem(req, res, next) {
   try {
     const { name, weather, imageUrl } = req.body;
 
@@ -33,52 +24,38 @@ async function createItem(req, res) {
     });
     return res.status(201).send(item);
   } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+    return next(
+      mapMongooseError(err, {
+        validationMessage: "Invalid data for create item",
+      }) || err
     );
-    if (err.name === "ValidationError") {
-      return res.status(BAD_REQUEST).send({
-        message: "Invalid data passed to the method for creating an item",
-      });
-    }
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
   }
 }
 
-async function deleteItem(req, res) {
+async function deleteItem(req, res, next) {
   try {
     const { itemId } = req.params;
 
     const item = await ClothingItem.findById(itemId);
 
-    if (!item) return res.status(404).send({ message: "Item not found" });
+    if (!item) throw createError("not_found", "Item not found");
 
     if (item.owner.toString() !== req.user._id) {
-      return res
-        .status(403)
-        .send({ message: "Forbidden this is not your Item" });
+      throw createError("forbidden", "Forbidden: this is not your item");
     }
     await ClothingItem.findByIdAndDelete(req.params.itemId).orFail();
     return res.send({ message: "Item deleted successfully" });
   } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+    return next(
+      mapMongooseError(err, {
+        badIdMessage: "Invalid ITEM ID",
+        notFoundMessage: "Item not found",
+      }) || err
     );
-    if (err.name === "DocumentNotFoundError") {
-      return res.status(NOT_FOUND).send({ message: "Item not found" });
-    }
-    if (err.name === "CastError") {
-      return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-    }
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
   }
 }
 
-async function likeItem(req, res) {
+async function likeItem(req, res, next) {
   try {
     const item = await ClothingItem.findByIdAndUpdate(
       req.params.itemId,
@@ -87,22 +64,16 @@ async function likeItem(req, res) {
     ).orFail();
     return res.send(item);
   } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+    return next(
+      mapMongooseError(err, {
+        badIdMessage: "Invalid Item ID",
+        notFoundMessage: "Item not found",
+      }) || err
     );
-    if (err.name === "DocumentNotFoundError") {
-      return res.status(NOT_FOUND).send({ message: "Item not found" });
-    }
-    if (err.name === "CastError") {
-      return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-    }
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
   }
 }
 
-async function dislikeItem(req, res) {
+async function dislikeItem(req, res, next) {
   try {
     const item = await ClothingItem.findByIdAndUpdate(
       req.params.itemId,
@@ -111,18 +82,12 @@ async function dislikeItem(req, res) {
     ).orFail();
     return res.send(item);
   } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`
+    return next(
+      mapMongooseError(err, {
+        badIdMessage: "Invalid item ID",
+        notFoundMessage: "Item not found",
+      }) || err
     );
-    if (err.name === "DocumentNotFoundError") {
-      return res.status(NOT_FOUND).send({ message: "Item not found" });
-    }
-    if (err.name === "CastError") {
-      return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-    }
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
   }
 }
 

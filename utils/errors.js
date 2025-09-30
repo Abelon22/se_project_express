@@ -32,7 +32,7 @@ class AppError extends Error {
     this.statusCode =
       statusCode || KIND_TO_STATUS[kind] || INTERNAL_SERVER_ERROR;
     this.meta = meta;
-    this.expose = this.statusCode < 500; // handy if you ever want to hide 5xx bodies
+   
     Error.captureStackTrace?.(this, this.constructor);
   }
 }

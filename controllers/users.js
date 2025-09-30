@@ -2,13 +2,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/user");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-} = require("../utils/errors");
+const { createError, mapMongooseError } = require("../utils/errors");
 
-async function createUser(req, res) {
+async function createUser(req, res, next) {
   try {
     const { email, password, name, avatar } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -25,18 +21,12 @@ async function createUser(req, res) {
 
     return res.status(201).send(safe);
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).send({ message: "Email already registerd" });
-    }
-
-    if (err.name === "ValidationError") {
-      return res.status(BAD_REQUEST).send({
-        message: "Invalid data passed to the method for creating a user",
-      });
-    }
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
+    return next(
+      mapMongooseError(err, {
+        duplicateMessage: "Email already registered",
+        validationMessage: "Invalid data passed to create user",
+      }) || err
+    );
   }
 }
 
@@ -51,8 +41,8 @@ async function login(req, res) {
     });
 
     return res.send({ token });
-  } catch (err) {
-    return res.status(401).send({ message: "Invalid email or password" });
+  } catch (_err) {
+    return next(createError("unauthorized", "Invalid email or password"));
   }
 }
 
@@ -67,7 +57,7 @@ async function getCurrentUser(req, res) {
   }
 }
 
-async function updateCurrentUser(req, res) {
+async function updateCurrentUser(req, res, next) {
   try {
     const { name, avatar } = req.body;
     const updated = await User.findByIdAndUpdate(
@@ -75,13 +65,15 @@ async function updateCurrentUser(req, res) {
       { name, avatar },
       { new: true, runValidators: true } // enable validators on update
     );
-    if (!updated) return res.status(404).send({ message: "User not found" });
+    if (!updated) throw createError("not_found", "User not found");
     return res.send(updated);
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(400).send({ message: "Invalid user data" });
-    }
-    return res.status(500).send({ message: "Server error" });
+    return next(
+      mapMongooseError(err, {
+        badIdMessage: "Invalid User Id",
+        validationMessage: "Invalid user data",
+      }) || err
+    );
   }
 }
 
