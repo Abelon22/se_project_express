@@ -30,7 +30,7 @@ async function createUser(req, res, next) {
   }
 }
 
-async function login(req, res) {
+async function login(req, res, next) {
   try {
     const { email, password } = req.body;
 
@@ -46,14 +46,18 @@ async function login(req, res) {
   }
 }
 
-async function getCurrentUser(req, res) {
+async function getCurrentUser(req, res, next) {
   try {
     const me = await User.findById(req.user._id);
 
-    if (!me) return res.status(404).send({ message: "User not found" });
+    if (!me) throw createError("not_found", "User not found");
     return res.send(me);
   } catch (err) {
-    return res.status(500).send({ message: "Server error" });
+    return next(
+      mapMongooseError(err, {
+        badIdMessage: "Invalid User Id",
+      }) || err
+    );
   }
 }
 
@@ -63,7 +67,7 @@ async function updateCurrentUser(req, res, next) {
     const updated = await User.findByIdAndUpdate(
       req.user._id,
       { name, avatar },
-      { new: true, runValidators: true } // enable validators on update
+      { new: true, runValidators: true }
     );
     if (!updated) throw createError("not_found", "User not found");
     return res.send(updated);

@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 const BAD_REQUEST = 400;
 const UNAUTHORIZED = 401;
 const FORBIDDEN = 403;
@@ -32,7 +31,7 @@ class AppError extends Error {
     this.statusCode =
       statusCode || KIND_TO_STATUS[kind] || INTERNAL_SERVER_ERROR;
     this.meta = meta;
-   
+
     Error.captureStackTrace?.(this, this.constructor);
   }
 }

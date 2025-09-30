@@ -26,9 +26,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/signin", login);
-app.post("signup", createUser);
-
 app.use(routes);
 
 app.use(errorHandler);
