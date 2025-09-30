@@ -42,7 +42,7 @@ async function login(req, res, next) {
 
     return res.send({ token });
   } catch (_err) {
-    return next(createError("unauthorized", "Invalid email or password"));
+    return next(createError("bad_request", "Invalid email or password"));
   }
 }
 
