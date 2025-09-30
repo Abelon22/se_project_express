@@ -49,6 +49,17 @@ async function createItem(req, res) {
 
 async function deleteItem(req, res) {
   try {
+    const { itemId } = req.params;
+
+    const item = await ClothingItem.findById(itemId);
+
+    if (!item) return res.status(404).send({ message: "Item not found" });
+
+    if (item.owner.toString() !== req.user._id) {
+      return res
+        .status(403)
+        .send({ message: "Forbidden this is not your Item" });
+    }
     await ClothingItem.findByIdAndDelete(req.params.itemId).orFail();
     return res.send({ message: "Item deleted successfully" });
   } catch (err) {

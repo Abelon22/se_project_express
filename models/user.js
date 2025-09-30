@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -18,6 +19,52 @@ const userSchema = new mongoose.Schema({
       message: "You must enter a valid URL",
     },
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator(value) {
+        return validator.isEmail(value);
+      },
+      message: "You must enter a valid email",
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 8,
+    select: false,
+  },
 });
+
+/* 
+Instead of hasing the password in the signup route could use a pre('save') middleware 
+
+userSchema.pre("save", async function hashPassword(next) { 
+if (!this.isModified("password") return next()); 
+this.password = await bcrypt.hash(this.password, 10); 
+next()
+})
+
+
+*/
+
+userSchema.statics.findUserByCredentials = async function (email, password) {
+  const user = await this.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new Error("Email does not exist");
+  }
+
+  const matched = await bcrypt.compare(password, user.password);
+
+  if (!matched) {
+    throw new Error("Invalid password");
+  }
+
+  user.password = undefined;
+  return user;
+};
 
 module.exports = mongoose.model("user", userSchema);
