@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/errorHandler");
-const swaggerUi = require("swagger-ui-express");
+
 const { openapiSpec } = require("./docs/openapi");
 
 const { MONGO_URI, PORT } = require("./utils/config");

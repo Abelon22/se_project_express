@@ -38,18 +38,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-/* 
-Instead of hasing the password in the signup route could use a pre('save') middleware 
-
-userSchema.pre("save", async function hashPassword(next) { 
-if (!this.isModified("password") return next()); 
-this.password = await bcrypt.hash(this.password, 10); 
-next()
-})
-
-
-*/
-
 userSchema.statics.findUserByCredentials = async function (email, password) {
   const user = await this.findOne({ email }).select("+password");
 
