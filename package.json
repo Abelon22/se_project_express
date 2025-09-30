@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "test": "NODE_ENV=test jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "validator": "^13.15.15"
   },
   "devDependencies": {
@@ -36,7 +39,6 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.10.2",
     "eslint-plugin-import": "^2.32.0",
-    "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "prettier": "^2.8.8"
   }

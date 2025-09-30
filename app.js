@@ -3,7 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const routes = require("./routes");
 const errorHandler = require("./middlewares/errorHandler");
-const { createUser, login } = require("./controllers/users");
+const swaggerUi = require("swagger-ui-express");
+const { openapiSpec } = require("./docs/openapi");
 
 const { MONGO_URI, PORT } = require("./utils/config");
 
@@ -25,6 +26,11 @@ app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openapiSpec, { explorer: true })
+);
 
 app.use(routes);
 
