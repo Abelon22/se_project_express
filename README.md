@@ -27,7 +27,7 @@ A Node.js/Express API for the WTWR app that helps users decide what to wear base
 - **Clothing Items**: public listing, owner-only delete, like/unlike
 - **Centralized Error Handling** with consistent JSON responses
 - **Interactive API Docs** (Swagger UI) served from the app
-- **Smoke Test & Jest E2E** coverage for the main flows (positive + negative)
+- **Smoke Test** coverage for api with axios. Install if needed.
 
 ## Tech Stack
 
