@@ -1,5 +1,9 @@
 const ClothingItem = require("../models/clothingItem");
-const { createError, mapMongooseError } = require("../utils/errors");
+const {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} = require("../middlewares/error-handler");
 
 async function getItems(_req, res, next) {
   try {
@@ -22,13 +26,14 @@ async function createItem(req, res, next) {
       imageUrl,
       owner: req.user._id,
     });
+
+    console.log(item);
     return res.status(201).send(item);
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        validationMessage: "Invalid data for create item",
-      }) || err
-    );
+    if (err.name === "ValidationError") {
+      return next(new BadRequestError("Invalid data for create item"));
+    }
+    return next(err);
   }
 }
 
@@ -38,20 +43,23 @@ async function deleteItem(req, res, next) {
 
     const item = await ClothingItem.findById(itemId);
 
-    if (!item) throw createError("not_found", "Item not found");
+    console.log("DELETING ITEM", item);
+
+    if (!item) throw new NotFoundError("Item not found");
 
     if (item.owner.toString() !== req.user._id) {
-      throw createError("forbidden", "Forbidden: this is not your item");
+      throw new ForbiddenError("Forbidden: this is not your item");
     }
     await ClothingItem.findByIdAndDelete(req.params.itemId).orFail();
     return res.send({ message: "Item deleted successfully" });
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        badIdMessage: "Invalid ITEM ID",
-        notFoundMessage: "Item not found",
-      }) || err
-    );
+    if (err.name === "CastError") {
+      return next(new BadRequestError("Invalid ITEM ID"));
+    }
+    if (err.name === "DocumentNotFoundError") {
+      return next(new NotFoundError("Item not found"));
+    }
+    return next(err);
   }
 }
 
@@ -62,14 +70,17 @@ async function likeItem(req, res, next) {
       { $addToSet: { likes: req.user._id } },
       { new: true }
     ).orFail();
+
+    console.log(item);
     return res.send(item);
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        badIdMessage: "Invalid Item ID",
-        notFoundMessage: "Item not found",
-      }) || err
-    );
+    if (err.name === "CastError") {
+      return next(new BadRequestError("Invalid Item ID"));
+    }
+    if (err.name === "DocumentNotFoundError") {
+      return next(new NotFoundError("Item not found"));
+    }
+    return next(err);
   }
 }
 
@@ -82,12 +93,13 @@ async function dislikeItem(req, res, next) {
     ).orFail();
     return res.send(item);
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        badIdMessage: "Invalid item ID",
-        notFoundMessage: "Item not found",
-      }) || err
-    );
+    if (err.name === "CastError") {
+      return next(new BadRequestError("Invalid item ID"));
+    }
+    if (err.name === "DocumentNotFoundError") {
+      return next(new NotFoundError("Item not found"));
+    }
+    return next(err);
   }
 }
 

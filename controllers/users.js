@@ -2,7 +2,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/user");
-const { createError, mapMongooseError } = require("../utils/errors");
+const {
+  BadRequestError,
+  NotFoundError,
+  ConflictError,
+} = require("../middlewares/error-handler");
 
 async function createUser(req, res, next) {
   try {
@@ -21,12 +25,13 @@ async function createUser(req, res, next) {
 
     return res.status(201).send(safe);
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        duplicateMessage: "Email already registered",
-        validationMessage: "Invalid data passed to create user",
-      }) || err
-    );
+    if (err.code === 11000) {
+      return next(new ConflictError("Email already registered"));
+    }
+    if (err.name === "ValidationError") {
+      return next(new BadRequestError("Invalid data passed to create user"));
+    }
+    return next(err);
   }
 }
 
@@ -42,7 +47,7 @@ async function login(req, res, next) {
 
     return res.send({ token });
   } catch (_err) {
-    return next(createError("bad_request", "Invalid email or password"));
+    return next(new BadRequestError("Invalid email or password"));
   }
 }
 
@@ -50,34 +55,36 @@ async function getCurrentUser(req, res, next) {
   try {
     const me = await User.findById(req.user._id);
 
-    if (!me) throw createError("not_found", "User not found");
+    if (!me) throw new NotFoundError("User not found");
     return res.send(me);
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        badIdMessage: "Invalid User Id",
-      }) || err
-    );
+    if (err.name === "CastError") {
+      return next(new BadRequestError("Invalid User Id"));
+    }
+    return next(err);
   }
 }
 
 async function updateCurrentUser(req, res, next) {
   try {
     const { name, avatar } = req.body;
+
+    console.log(req.body);
     const updated = await User.findByIdAndUpdate(
       req.user._id,
       { name, avatar },
       { new: true, runValidators: true }
     );
-    if (!updated) throw createError("not_found", "User not found");
+    if (!updated) throw new NotFoundError("User not found");
     return res.send(updated);
   } catch (err) {
-    return next(
-      mapMongooseError(err, {
-        badIdMessage: "Invalid User Id",
-        validationMessage: "Invalid user data",
-      }) || err
-    );
+    if (err.name === "CastError") {
+      return next(new BadRequestError("Invalid User Id"));
+    }
+    if (err.name === "ValidationError") {
+      return next(new BadRequestError("Invalid user data"));
+    }
+    return next(err);
   }
 }
 

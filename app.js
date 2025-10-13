@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 const express = require("express");
+const { errors } = require("celebrate");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const routes = require("./routes");
-const errorHandler = require("./middlewares/errorHandler");
+const { errorHandler } = require("./middlewares/error-handler");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const { openapiSpec } = require("./docs/openapi");
 
@@ -32,8 +34,12 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(openapiSpec, { explorer: true })
 );
-
+app.use(requestLogger);
 app.use(routes);
+
+app.use(errorLogger);
+
+app.use(errors());
 
 app.use(errorHandler);
 
