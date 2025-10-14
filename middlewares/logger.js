@@ -1,7 +1,6 @@
 const winston = require("winston");
 const expressWinston = require("express-winston");
 
-// create the custom formatter
 const messageFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.printf(
@@ -10,7 +9,6 @@ const messageFormat = winston.format.combine(
   )
 );
 
-// create a request logger
 const requestLogger = expressWinston.logger({
   transports: [
     new winston.transports.Console({
