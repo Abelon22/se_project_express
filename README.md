@@ -245,3 +245,12 @@ npm run lint
   node scripts/export-openapi.js  # writes ./openapi.json
   ```
 - Generate a TypeScript Axios SDK with OpenAPI Generator or roll your own minimal client (see `sdk/` if included)
+
+## Accessing the Application
+
+- **Deployed frontend (primary domain):** https://wtwr.lookids.com  
+  (also available at https://www.wtwr.lookids.com)
+
+- **API base URL:** https://api.wtwr.lookids.com
+
+- **Frontend repository:** https://github.com/Abelon22/se_project_react
