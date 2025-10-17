@@ -22,5 +22,8 @@ ssh_add.txt sprint.txt
 
 sprint_12_auth_instructions.txt  
 
-*.log 
+*.log  
+
+
+.env 
 
