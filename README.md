@@ -254,3 +254,8 @@ npm run lint
 - **API base URL:** https://api.wtwr.lookids.com
 
 - **Frontend repository:** https://github.com/Abelon22/se_project_react
+
+## Project Pitch Video (Hosted on LOOM)
+
+Check out the project pitch video here: https://www.loom.com/share/118a8e0e755c496eb2816ae5f318b40b?sid=9e52a973-9757-4fd7-a16b-57e6332bc0da
+I describe the project and my engineering process.

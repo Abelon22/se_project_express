@@ -14,12 +14,12 @@ router.get("/crash-test", () => {
   }, 0);
 });
 
-router.post("/signin", validateAuthentication, login);
-router.post("/signup", validateUserBody, createUser);
-
 router.use("/items", clothingItemRouter);
 
 router.use("/users", userRouter);
+
+router.post("/signin", validateAuthentication, login);
+router.post("/signup", validateUserBody, createUser);
 
 router.use((req, res, next) =>
   next(new NotFoundError("Requested resource not found"))

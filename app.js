@@ -24,18 +24,8 @@ connectToMongoose()
   });
 
 const app = express();
-const allowedOrigins = [
-  "https://wtwr.lookids.com",
-  "https://www.wtwr.lookids.com",
-  "https://api.wtwr.lookids.com", // usually not needed as an Origin, but ok to include
-];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true, // if you send cookies/authorization
-  })
-);
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
